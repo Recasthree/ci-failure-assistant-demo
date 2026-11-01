@@ -1,36 +1,25 @@
-# Installs dependencies, runs tests and lint
-
-name: Flask demo app
+name: pytest acceptance demo
 
 on:
   push:
-    branches: [ main ]
+    branches: [ci-demo-failure]
   pull_request:
-    branches: [ main ]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  build:
+  pytest:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.11"
-    - name: Update pip and install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install flake8 pytest black
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Flake8 linting
-      run: |
-        # stops the build if errors
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: PyTest
-      run: |
-        pytest
-    - name: Black format
-      run: |
-        black --line-length 127 myapp.py
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install pytest and app dependency
+        run: python -m pip install pytest==7.4.2 flask==2.3.3
+      - name: Run pytest
+        run: python -m pytest -q
